@@ -1,13 +1,3 @@
-// FIXME(samgoldman) Remove top-level interface once Babel supports
-// `declare interface` syntax.
-// FIXME(samgoldman) Remove this once rxjs$Subject<T> can mixin rxjs$Observer<T>
-interface rxjs$IObserver<-T> {
-  closed?: boolean;
-  next(value: T): mixed;
-  error(error: any): mixed;
-  complete(): mixed;
-}
-
 type rxjs$PartialObserver<-T> =
   | {
       +next: (value: T) => mixed,
@@ -1301,11 +1291,10 @@ declare class rxjs$GroupedObservable<K, V> extends rxjs$Observable<V> {
   key: K;
 }
 
-declare class rxjs$Observer<T> {
+declare interface rxjs$Observer<T> {
+  closed?: boolean;
   next(value: T): mixed;
-
   error(error: any): mixed;
-
   complete(): mixed;
 }
 
@@ -1313,18 +1302,14 @@ declare interface rxjs$Operator<T, R> {
   call(subscriber: rxjs$Subscriber<R>, source: any): rxjs$TeardownLogic;
 }
 
-declare class rxjs$Subject<T> extends rxjs$Observable<T> mixins rxjs$Observer<T> {
+declare class rxjs$Subject<T> extends rxjs$Observable<T> implements rxjs$Observer<T> {
   static create<T>(
     destination: rxjs$Observer<T>,
     source: rxjs$Observable<T>
   ): rxjs$AnonymousSubject<T>;
-
   asObservable(): rxjs$Observable<T>;
-
   observers: Array<rxjs$Observer<T>>;
-
   unsubscribe(): void;
-
   // For use in subclasses only:
   _next(value: T): void;
 }
@@ -1334,7 +1319,7 @@ declare class rxjs$AnonymousSubject<T> extends rxjs$Subject<T> {
   destination: ?rxjs$Observer<T>;
 
   constructor(
-    destination?: rxjs$IObserver<T>,
+    destination?: rxjs$Observer<T>,
     source?: rxjs$Observable<T>
   ): void;
   next(value: T): void;
